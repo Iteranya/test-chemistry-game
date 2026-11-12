@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Elementary, Dear Doodle — an alchemical clicker where you discover the chemistry of everyday life. One magical Crucible, two slots, chemistry that mostly balances.">
+<title>Elementary, Dear Doodle — Everyday Alchemy</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='88'>⚗️</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header id="topbar">
+  <div class="brand">
+    <span class="brand-glyph" aria-hidden="true">⚗️</span>
+    <div>
+      <h1>Elementary, Dear Doodle</h1>
+      <p class="tagline">Everyday alchemy · the chemistry of your kitchen · one magic pot</p>
+    </div>
+  </div>
+  <div class="hud">
+    <div class="energy-wrap" title="Energy — fizzles cost 5, discoveries grant 10">
+      <span class="energy-label">⚡</span>
+      <div class="energy-bar"><div id="energyFill" class="energy-fill"></div></div>
+      <span id="energyText" class="energy-text">100</span>
+    </div>
+    <button id="oracleBtn" class="hud-btn oracle" title="Spend 10 energy for a cryptic hint from the Oracle">🔮 Oracle <small>(10⚡)</small></button>
+    <button id="statsBtn" class="hud-btn" title="Your progress so far">📊 Stats</button>
+    <button id="exportBtn" class="hud-btn" title="Download your save as JSON">⤓ Save</button>
+    <label class="hud-btn import-label" title="Load a save file">⤒ Load
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+    </label>
+    <button id="resetBtn" class="hud-btn danger" title="Burn it all down and start over">🗑️ New Game</button>
+  </div>
+</header>
+
+<main id="layout">
+  <!-- LEFT: the player's bench of known cards -->
+  <aside id="benchPanel" class="panel">
+    <h2 class="panel-title">🧪 Lab Bench <span id="benchCount" class="pill">9</span></h2>
+    <p class="panel-hint">Click a card to place it in the Crucible.</p>
+    <div id="benchGrid" class="bench-grid"></div>
+  </aside>
+
+  <!-- CENTER: the Crucible -->
+  <section id="cruciblePanel" class="panel">
+    <h2 class="panel-title crucible-title">THE CRUCIBLE</h2>
+    <p class="panel-hint">Two slots. Any quantities. Chemistry (mostly) does the rest.</p>
+
+    <div class="crucible-stage">
+      <div class="slot-row">
+        <div class="slot-wrap">
+          <button class="slot" id="slotA" data-slot="0" aria-label="Slot 1">
+            <span class="slot-placeholder">Slot 1<br><small>click a bench card</small></span>
+          </button>
+          <div class="qty-ctrl" data-slot="0">
+            <button class="qty-btn" data-delta="-1" aria-label="less">−</button>
+            <span class="qty-val" id="qtyA">1</span>
+            <button class="qty-btn" data-delta="1" aria-label="more">+</button>
+          </div>
+        </div>
+
+        <button id="swapBtn" class="swap-btn" title="Swap slots">⇄</button>
+
+        <div class="slot-wrap">
+          <button class="slot" id="slotB" data-slot="1" aria-label="Slot 2">
+            <span class="slot-placeholder">Slot 2<br><small>optional</small></span>
+          </button>
+          <div class="qty-ctrl" data-slot="1">
+            <button class="qty-btn" data-delta="-1" aria-label="less">−</button>
+            <span class="qty-val" id="qtyB">1</span>
+            <button class="qty-btn" data-delta="1" aria-label="more">+</button>
+          </div>
+        </div>
+      </div>
+
+      <button id="reactBtn" class="react-btn">🔥 REACT</button>
+
+      <div id="ventArea" class="vent-area" aria-live="polite">
+        <div class="vent-idle">The Crucible hums, waiting for reagents…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RIGHT: collection & journal -->
+  <aside id="journalPanel" class="panel">
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="collection" role="tab">📚 Collection <span id="collectionProgress" class="pill">0/36</span></button>
+      <button class="tab" data-tab="journal" role="tab">📖 Journal</button>
+      <button class="tab" data-tab="badges" role="tab">🏅 Badges</button>
+    </nav>
+    <div class="tab-panes">
+      <div id="tab-collection" class="tab-pane active" role="tabpanel"><div id="collectionGrid" class="collection-grid"></div></div>
+      <div id="tab-journal" class="tab-pane" role="tabpanel"><div id="journalList" class="journal-list"></div></div>
+      <div id="tab-badges" class="tab-pane" role="tabpanel"><div id="badgeList" class="badge-list"></div></div>
+    </div>
+  </aside>
+</main>
+
+<!-- generic modal -->
+<div id="modal" class="modal-overlay" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button id="modalClose" class="modal-close" aria-label="Close">✕</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- toasts -->
+<div id="toasts" aria-live="polite"></div>
+
+<!-- win banner -->
+<div id="winBanner" class="win-banner" hidden>
+  <div class="win-inner">
+    <h2>👑 GRAND ALCHEMIST</h2>
+    <p>Every everyday compound, discovered. The Crucible bows to you.</p>
+    <button id="winStatsBtn" class="hud-btn">See your legend →</button>
+    <button id="winCloseBtn" class="hud-btn">Keep playing</button>
+  </div>
+</div>
+
+<script src="js/lexicon.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
