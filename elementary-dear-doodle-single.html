@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Elementary, Dear Doodle — an alchemical clicker where you discover the chemistry of everyday life. One magical Crucible, two slots, chemistry that mostly balances.">
+<title>Elementary, Dear Doodle — Everyday Alchemy</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='88'>⚗️</text></svg>">
+<style>
+/* Elementary, Dear Doodle — alchemy lab theme */
+:root {
+  --bg: #14100c;
+  --bg-2: #1d1811;
+  --bg-3: #262016;
+  --panel: #211b13;
+  --panel-2: #2b2418;
+  --ink: #efe6d5;
+  --ink-dim: #b7a98d;
+  --amber: #f0b429;
+  --amber-deep: #d97706;
+  --teal: #2dd4bf;
+  --danger: #f87171;
+  --line: #3a3223;
+  --paper: #f5eeda;
+  --paper-ink: #4a3b25;
+  --shadow: 0 10px 30px rgba(0, 0, 0, .45);
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background:
+    radial-gradient(1200px 700px at 70% -10%, rgba(240, 180, 41, .08), transparent 60%),
+    radial-gradient(900px 600px at 10% 110%, rgba(45, 212, 191, .06), transparent 55%),
+    var(--bg);
+  color: var(--ink);
+  font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  min-height: 100vh;
+}
+
+/* ── Top bar ─────────────────────────────────────────────── */
+#topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; padding: .6rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+  background: rgba(20, 16, 12, .9); backdrop-filter: blur(6px);
+  position: sticky; top: 0; z-index: 20;
+}
+.brand { display: flex; align-items: center; gap: .7rem; }
+.brand-glyph { font-size: 1.9rem; filter: drop-shadow(0 2px 6px rgba(240,180,41,.4)); }
+.brand h1 { font-size: 1.15rem; letter-spacing: .04em; color: var(--amber); }
+.tagline { font-size: .68rem; color: var(--ink-dim); font-style: italic; }
+
+.hud { display: flex; align-items: center; gap: .45rem; flex-wrap: wrap; justify-content: flex-end; }
+.hud-btn {
+  background: var(--panel-2); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 10px;
+  padding: .4rem .6rem; font-size: .78rem; cursor: pointer;
+  font-family: inherit; transition: transform .12s, border-color .2s, background .2s;
+}
+.hud-btn:hover { border-color: var(--amber); background: #33291a; transform: translateY(-1px); }
+.hud-btn.oracle { border-color: rgba(45, 212, 191, .45); }
+.hud-btn.oracle small { color: var(--teal); }
+.hud-btn.danger:hover { border-color: var(--danger); }
+.import-label { display: inline-flex; align-items: center; gap: .3rem; }
+
+.energy-wrap { display: flex; align-items: center; gap: .4rem; margin-right: .2rem; }
+.energy-label { font-size: 1rem; }
+.energy-bar {
+  width: 110px; height: 12px; border-radius: 8px;
+  background: #151109; border: 1px solid var(--line); overflow: hidden;
+}
+.energy-fill {
+  height: 100%; width: 100%;
+  background: linear-gradient(90deg, var(--amber-deep), var(--amber) 60%, #ffe27a);
+  transition: width .4s ease;
+}
+.energy-text { font-size: .75rem; color: var(--ink-dim); min-width: 2ch; font-variant-numeric: tabular-nums; }
+
+/* ── Layout ──────────────────────────────────────────────── */
+#layout {
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr) 340px;
+  gap: 1rem; padding: 1rem;
+  max-width: 1500px; margin: 0 auto;
+}
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: .9rem; box-shadow: var(--shadow);
+}
+.panel-title { font-size: .95rem; color: var(--amber); letter-spacing: .06em; display: flex; align-items: center; gap: .5rem; margin-bottom: .35rem; }
+.panel-hint { font-size: .72rem; color: var(--ink-dim); font-style: italic; margin-bottom: .6rem; }
+.pill {
+  font-size: .65rem; background: var(--bg-3); color: var(--ink-dim);
+  border: 1px solid var(--line); padding: .1rem .45rem; border-radius: 999px;
+}
+
+/* ── Bench cards ─────────────────────────────────────────── */
+.bench-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem;
+  max-height: 70vh; overflow-y: auto; padding-right: .2rem;
+}
+.card {
+  position: relative; cursor: pointer; border: 1px solid rgba(0,0,0,.35);
+  border-radius: 10px; padding: .4rem .3rem .35rem; text-align: center;
+  background: linear-gradient(160deg, var(--card-c1, #555), var(--card-c2, #333));
+  color: #14100c; transition: transform .15s, box-shadow .2s; user-select: none;
+  display: flex; flex-direction: column; align-items: center; gap: .1rem;
+  min-height: 74px; justify-content: center;
+}
+.card:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 8px 18px rgba(0,0,0,.5); z-index: 2; }
+.card-symbol { font-weight: 700; font-size: 1.15rem; letter-spacing: .02em; text-shadow: 0 1px 0 rgba(255,255,255,.35); }
+.card-name { font-size: .55rem; line-height: 1.1; opacity: .85; font-family: system-ui, sans-serif; font-weight: 600; }
+.card-infinity { position: absolute; top: 2px; right: 5px; font-size: .6rem; opacity: .65; }
+.card.starter-card { box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); }
+.card[disabled] { opacity: .35; cursor: default; }
+
+/* ── Crucible stage ──────────────────────────────────────── */
+.crucible-title { font-size: 1.35rem; color: #ffd566; text-shadow: 0 2px 12px rgba(240,180,41,.35); letter-spacing: .22em; justify-content: center; }
+#cruciblePanel .panel-hint { text-align: center; }
+.crucible-stage {
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+  padding: .5rem .5rem .8rem;
+  background:
+    radial-gradient(340px 260px at 50% 38%, rgba(240,180,41,.12), transparent 70%),
+    var(--bg-2);
+  border: 1px dashed var(--line); border-radius: var(--radius);
+}
+.slot-row { display: flex; align-items: center; gap: 1.1rem; margin-top: .4rem; }
+.slot-wrap { display: flex; flex-direction: column; align-items: center; gap: .45rem; }
+.slot {
+  width: 132px; height: 150px; cursor: pointer;
+  border-radius: var(--radius); border: 2px dashed var(--line);
+  background: var(--panel-2); color: var(--ink-dim);
+  font-family: inherit; transition: border-color .2s, box-shadow .25s;
+  position: relative; overflow: hidden;
+}
+.slot.filled {
+  border-style: solid; border-color: var(--amber-deep);
+  background: linear-gradient(165deg, var(--card-c1, #555), var(--card-c2, #333));
+  color: #14100c;
+}
+.slot-placeholder { font-size: .78rem; line-height: 1.35; }
+.slot-placeholder small { font-size: .62rem; opacity: .7; }
+.slot-card { display: flex; flex-direction: column; align-items: center; gap: .2rem; padding: .3rem; height: 100%; justify-content: center; }
+.slot-card .card-symbol { font-size: 1.9rem; }
+.slot-card .card-name { font-size: .68rem; font-weight: 700; }
+.slot-card .card-emoji { font-size: 1.5rem; }
+
+.qty-ctrl { display: flex; align-items: center; gap: .4rem; }
+.qty-btn {
+  width: 28px; height: 28px; border-radius: 8px; cursor: pointer;
+  background: var(--panel-2); color: var(--amber); border: 1px solid var(--line);
+  font-size: 1rem; font-weight: 700; transition: background .15s;
+}
+.qty-btn:hover { background: #38301f; }
+.qty-val { min-width: 2ch; text-align: center; font-size: 1.05rem; font-variant-numeric: tabular-nums; color: var(--ink); }
+
+.swap-btn {
+  width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line);
+  background: var(--panel-2); color: var(--ink-dim); font-size: 1.2rem; cursor: pointer;
+  transition: transform .3s, color .2s;
+}
+.swap-btn:hover { transform: rotate(180deg); color: var(--amber); }
+
+.react-btn {
+  font-family: Georgia, serif; font-size: 1.25rem; letter-spacing: .18em;
+  padding: .8rem 2.6rem; border-radius: 999px; cursor: pointer;
+  color: #241503; border: none;
+  background: radial-gradient(circle at 35% 30%, #ffe27a, var(--amber) 55%, var(--amber-deep));
+  box-shadow: 0 6px 24px rgba(240,180,41,.35), inset 0 -3px 6px rgba(0,0,0,.3);
+  transition: transform .15s, box-shadow .2s, filter .2s;
+}
+.react-btn:hover { transform: translateY(-2px) scale(1.03); filter: saturate(1.15); box-shadow: 0 10px 32px rgba(240,180,41,.45), inset 0 -3px 6px rgba(0,0,0,.3); }
+.react-btn:active { transform: translateY(1px) scale(.98); }
+.react-btn:disabled { filter: grayscale(.8) brightness(.6); cursor: wait; }
+
+.vent-area {
+  width: 100%; min-height: 96px; border-radius: var(--radius);
+  background: #100d08; border: 1px solid var(--line);
+  padding: .6rem .8rem; font-size: .82rem; color: var(--ink-dim);
+  display: flex; flex-direction: column; gap: .35rem; justify-content: center;
+}
+.vent-idle { text-align: center; font-style: italic; opacity: .7; }
+.vent-line { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.vent-arrow { color: var(--amber); }
+.vent-chip {
+  display: inline-flex; align-items: center; gap: .3rem;
+  background: var(--bg-3); border: 1px solid var(--line);
+  border-radius: 999px; padding: .12rem .55rem; font-size: .72rem; color: var(--ink);
+}
+.vent-chip.new { border-color: var(--teal); color: #a7f3d0; box-shadow: 0 0 12px rgba(45,212,191,.25); }
+.vent-chip.special { border-color: var(--amber); color: #ffe27a; box-shadow: 0 0 14px rgba(240,180,41,.3); }
+.vent-junk { color: #8a7f66; font-size: .72rem; }
+.vent-complete { color: var(--teal); font-size: .78rem; }
+
+/* ── Right panel: tabs ───────────────────────────────────── */
+.tabs { display: flex; gap: .3rem; margin-bottom: .6rem; }
+.tab {
+  flex: 1; background: var(--bg-3); border: 1px solid var(--line);
+  color: var(--ink-dim); border-radius: 10px 10px 0 0; padding: .45rem .2rem;
+  font-size: .72rem; cursor: pointer; font-family: inherit;
+  transition: background .2s, color .2s;
+}
+.tab.active { background: var(--panel-2); color: var(--amber); border-bottom-color: var(--panel-2); }
+.tab-pane { display: none; max-height: 66vh; overflow-y: auto; padding-right: .15rem; }
+.tab-pane.active { display: block; }
+
+.collection-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; }
+.collect-card {
+  border-radius: 10px; padding: .4rem .25rem .35rem; text-align: center;
+  border: 1px solid var(--line); min-height: 74px; position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: .15rem; justify-content: center;
+}
+.collect-card.unlocked {
+  cursor: pointer; border-color: rgba(240,180,41,.3);
+  background: linear-gradient(160deg, var(--card-c1), var(--card-c2));
+  color: #14100c; transition: transform .15s, box-shadow .2s;
+}
+.collect-card.unlocked:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.5); }
+.collect-card.locked { background: #181410; color: #54493a; border-style: dashed; }
+.collect-card .card-symbol { font-size: 1.05rem; font-weight: 700; }
+.collect-card .card-name { font-size: .52rem; opacity: .8; font-family: system-ui, sans-serif; }
+
+.journal-list { display: flex; flex-direction: column; gap: .4rem; }
+.journal-entry {
+  background: var(--paper); color: var(--paper-ink);
+  border-radius: 8px 8px 2px 8px; padding: .45rem .6rem;
+  font-size: .75rem; cursor: pointer; border: none; text-align: left;
+  font-family: Georgia, serif; box-shadow: 2px 3px 6px rgba(0,0,0,.35);
+  transition: transform .12s;
+}
+.journal-entry:hover { transform: translateY(-1px) rotate(-.3deg); }
+.journal-entry b { display: block; font-size: .8rem; }
+.journal-entry small { opacity: .75; font-style: italic; }
+
+.badge-list { display: flex; flex-direction: column; gap: .4rem; }
+.badge {
+  display: flex; gap: .6rem; align-items: center;
+  background: var(--panel-2); border: 1px solid var(--line);
+  padding: .5rem .6rem; border-radius: 10px; opacity: .45; filter: grayscale(1);
+}
+.badge.earned { opacity: 1; filter: none; border-color: rgba(240,180,41,.4); box-shadow: 0 0 14px rgba(240,180,41,.12); }
+.badge-emoji { font-size: 1.6rem; }
+.badge-name { font-size: .82rem; color: var(--ink); font-weight: 700; }
+.badge-desc { font-size: .66rem; color: var(--ink-dim); }
+
+/* ── Toasts ──────────────────────────────────────────────── */
+#toasts { position: fixed; bottom: 1.2rem; left: 50%; transform: translateX(-50%); z-index: 60; display: flex; flex-direction: column; gap: .4rem; align-items: center; pointer-events: none; }
+.toast {
+  background: #100d08; border: 1px solid var(--teal); color: #a7f3d0;
+  padding: .45rem 1.1rem; border-radius: 999px; font-size: .82rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,.5); animation: toast-in .3s ease, toast-out .4s ease 2.4s forwards;
+  max-width: 90vw; text-align: center;
+}
+.toast.badge-toast { border-color: var(--amber); color: #ffe27a; }
+.toast.fizzle-toast { border-color: var(--danger); color: #fca5a5; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes toast-out { to { opacity: 0; transform: translateY(-8px); } }
+
+/* ── Modal ───────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(8, 6, 4, .72); backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.modal-overlay[hidden] { display: none; }
+.modal-card {
+  background: var(--paper); color: var(--paper-ink);
+  border-radius: 6px 18px 6px 18px; max-width: 480px; width: 100%;
+  max-height: 85vh; overflow-y: auto; padding: 1.4rem 1.5rem;
+  box-shadow: 0 24px 60px rgba(0,0,0,.6); position: relative;
+  animation: modal-in .25s ease;
+}
+@keyframes modal-in { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: none; } }
+.modal-close {
+  position: absolute; top: .5rem; right: .7rem; border: none; background: none;
+  font-size: 1.1rem; cursor: pointer; color: var(--paper-ink); opacity: .6;
+}
+.modal-close:hover { opacity: 1; }
+. modal-big-symbol { font-size: 3rem; font-weight: 700; line-height: 1; }
+.modal-emoji { font-size: 2rem; }
+.modal-equation {
+  font-family: 'Courier New', monospace; background: #e9e1cd; border-radius: 8px;
+  padding: .45rem .6rem; font-size: .78rem; margin: .5rem 0; overflow-x: auto; white-space: nowrap;
+}
+.modal-flavor { font-style: italic; margin: .4rem 0; }
+.modal-real { font-size: .78rem; opacity: .85; }
+
+/* ── Win banner ──────────────────────────────────────────── */
+.win-banner {
+  position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center;
+  background: rgba(8,6,4,.8); backdrop-filter: blur(4px);
+}
+.win-banner[hidden] { display: none; }
+.win-inner {
+  text-align: center; padding: 2rem 3rem; border-radius: var(--radius);
+  background: linear-gradient(170deg, #2b2418, #14100c); border: 2px solid var(--amber);
+  box-shadow: 0 0 80px rgba(240,180,41,.35); animation: modal-in .4s ease;
+}
+.win-inner h2 { color: var(--amber); letter-spacing: .2em; margin-bottom: .5rem; }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 1080px) {
+  #layout { grid-template-columns: 240px 1fr; }
+  #journalPanel { grid-column: 1 / -1; }
+  .tab-pane { max-height: 40vh; }
+}
+@media (max-width: 760px) {
+  #layout { grid-template-columns: 1fr; }
+  #topbar { flex-direction: column; align-items: flex-start; }
+  .bench-grid { grid-template-columns: repeat(5, 1fr); }
+  .slot { width: 110px; height: 126px; }
+}
+
+</style>
+</head>
+<body>
+<header id="topbar">
+  <div class="brand">
+    <span class="brand-glyph" aria-hidden="true">⚗️</span>
+    <div>
+      <h1>Elementary, Dear Doodle</h1>
+      <p class="tagline">Everyday alchemy · the chemistry of your kitchen · one magic pot</p>
+    </div>
+  </div>
+  <div class="hud">
+    <div class="energy-wrap" title="Energy — fizzles cost 5, discoveries grant 10">
+      <span class="energy-label">⚡</span>
+      <div class="energy-bar"><div id="energyFill" class="energy-fill"></div></div>
+      <span id="energyText" class="energy-text">100</span>
+    </div>
+    <button id="oracleBtn" class="hud-btn oracle" title="Spend 10 energy for a cryptic hint from the Oracle">🔮 Oracle <small>(10⚡)</small></button>
+    <button id="statsBtn" class="hud-btn" title="Your progress so far">📊 Stats</button>
+    <button id="exportBtn" class="hud-btn" title="Download your save as JSON">⤓ Save</button>
+    <label class="hud-btn import-label" title="Load a save file">⤒ Load
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+    </label>
+    <button id="resetBtn" class="hud-btn danger" title="Burn it all down and start over">🗑️ New Game</button>
+  </div>
+</header>
+
+<main id="layout">
+  <!-- LEFT: the player's bench of known cards -->
+  <aside id="benchPanel" class="panel">
+    <h2 class="panel-title">🧪 Lab Bench <span id="benchCount" class="pill">9</span></h2>
+    <p class="panel-hint">Click a card to place it in the Crucible.</p>
+    <div id="benchGrid" class="bench-grid"></div>
+  </aside>
+
+  <!-- CENTER: the Crucible -->
+  <section id="cruciblePanel" class="panel">
+    <h2 class="panel-title crucible-title">THE CRUCIBLE</h2>
+    <p class="panel-hint">Two slots. Any quantities. Chemistry (mostly) does the rest.</p>
+
+    <div class="crucible-stage">
+      <div class="slot-row">
+        <div class="slot-wrap">
+          <button class="slot" id="slotA" data-slot="0" aria-label="Slot 1">
+            <span class="slot-placeholder">Slot 1<br><small>click a bench card</small></span>
+          </button>
+          <div class="qty-ctrl" data-slot="0">
+            <button class="qty-btn" data-delta="-1" aria-label="less">−</button>
+            <span class="qty-val" id="qtyA">1</span>
+            <button class="qty-btn" data-delta="1" aria-label="more">+</button>
+          </div>
+        </div>
+
+        <button id="swapBtn" class="swap-btn" title="Swap slots">⇄</button>
+
+        <div class="slot-wrap">
+          <button class="slot" id="slotB" data-slot="1" aria-label="Slot 2">
+            <span class="slot-placeholder">Slot 2<br><small>optional</small></span>
+          </button>
+          <div class="qty-ctrl" data-slot="1">
+            <button class="qty-btn" data-delta="-1" aria-label="less">−</button>
+            <span class="qty-val" id="qtyB">1</span>
+            <button class="qty-btn" data-delta="1" aria-label="more">+</button>
+          </div>
+        </div>
+      </div>
+
+      <button id="reactBtn" class="react-btn">🔥 REACT</button>
+
+      <div id="ventArea" class="vent-area" aria-live="polite">
+        <div class="vent-idle">The Crucible hums, waiting for reagents…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RIGHT: collection & journal -->
+  <aside id="journalPanel" class="panel">
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="collection" role="tab">📚 Collection <span id="collectionProgress" class="pill">0/36</span></button>
+      <button class="tab" data-tab="journal" role="tab">📖 Journal</button>
+      <button class="tab" data-tab="badges" role="tab">🏅 Badges</button>
+    </nav>
+    <div class="tab-panes">
+      <div id="tab-collection" class="tab-pane active" role="tabpanel"><div id="collectionGrid" class="collection-grid"></div></div>
+      <div id="tab-journal" class="tab-pane" role="tabpanel"><div id="journalList" class="journal-list"></div></div>
+      <div id="tab-badges" class="tab-pane" role="tabpanel"><div id="badgeList" class="badge-list"></div></div>
+    </div>
+  </aside>
+</main>
+
+<!-- generic modal -->
+<div id="modal" class="modal-overlay" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button id="modalClose" class="modal-close" aria-label="Close">✕</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- toasts -->
+<div id="toasts" aria-live="polite"></div>
+
+<!-- win banner -->
+<div id="winBanner" class="win-banner" hidden>
+  <div class="win-inner">
+    <h2>👑 GRAND ALCHEMIST</h2>
+    <p>Every everyday compound, discovered. The Crucible bows to you.</p>
+    <button id="winStatsBtn" class="hud-btn">See your legend →</button>
+    <button id="winCloseBtn" class="hud-btn">Keep playing</button>
+  </div>
+</div>
+
+<script>
+/* Elementary, Dear Doodle — lexicon.
+ * The entire game's content. Every entry is matched by atom-vector tiling.
+ * Atom keys are lowercase element symbols; quantities are integers.
+ * This file is UMD so the Node reachability validator (tools/validate.cjs)
+ * can load it without a browser.
+ *
+ * ENTRY ORDER IS THE TIE-BREAK: when two solutions score identically on
+ * (atoms, novelty, input tiles, tile count, weight), the engine prefers
+ * tiles from entries listed EARLIER here. Keep "big useful everyday
+ * compounds" ahead of "confetti alternatives". */
+(function (root, factory) {
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = factory();
+  } else {
+    root.LEXICON = factory();
+  }
+})(typeof self !== 'undefined' ? self : this, function () {
+  var STARTERS = [
+    { id: 'h',  kind: 'starter', name: 'Hydrogen', symbol: 'H',  vector: { h: 1 },  color: '#7dd3fc', emoji: '⚛️', flavor: 'The lightest thing that exists.', hint: '' },
+    { id: 'c',  kind: 'starter', name: 'Carbon',   symbol: 'C',  vector: { c: 1 },  color: '#94a3b8', emoji: '⬛', flavor: 'Life’s backbone, coal’s cousin.', hint: '' },
+    { id: 'n',  kind: 'starter', name: 'Nitrogen', symbol: 'N',  vector: { n: 1 },  color: '#a5b4fc', emoji: '🌬️', flavor: 'Five breaths out of every ten.', hint: '' },
+    { id: 'o',  kind: 'starter', name: 'Oxygen',   symbol: 'O',  vector: { o: 1 },  color: '#fca5a5', emoji: '🫁', flavor: 'The reason fire and lungs work.', hint: '' },
+    { id: 'na', kind: 'starter', name: 'Sodium',   symbol: 'Na', vector: { na: 1 }, color: '#fcd34d', emoji: '🧂', flavor: 'Soft, silvery, hates water.', hint: '' },
+    { id: 'cl', kind: 'starter', name: 'Chlorine', symbol: 'Cl', vector: { cl: 1 }, color: '#bef264', emoji: '🏞️', flavor: 'The pool water’s sharp smell.', hint: '' },
+    { id: 'ca', kind: 'starter', name: 'Calcium',  symbol: 'Ca', vector: { ca: 1 }, color: '#fdba74', emoji: '🦴', flavor: 'Bones, cliffs, and chalk.', hint: '' },
+    { id: 'fe', kind: 'starter', name: 'Iron',     symbol: 'Fe', vector: { fe: 1 }, color: '#d4d4d8', emoji: '🔩', flavor: 'Blood, bridges, and blades.', hint: '' },
+    { id: 'si', kind: 'starter', name: 'Silicon',  symbol: 'Si', vector: { si: 1 }, color: '#c4b5fd', emoji: '🏖️', flavor: 'Sand, chips, and glass.', hint: '' }
+  ];
+
+  /* kind: molecule | everyday | special
+   * base vectors are MINIMAL; any integer multiple tiles. */
+  var ENTRIES = [
+    { id: 'h2',  kind: 'molecule', name: 'Hydrogen gas', symbol: 'H₂',  vector: { h: 2 }, color: '#38bdf8', emoji: '💨', tier: 1, flavor: 'The fuel of stars and dirigibles.', hint: 'Two hydrogen atoms decide to hold hands.' },
+    { id: 'o2',  kind: 'molecule', name: 'Oxygen gas',   symbol: 'O₂',  vector: { o: 2 }, color: '#f87171', emoji: '🔥', tier: 1, flavor: 'Two atoms, minimum for fire.', hint: 'Oxygen refuses to go alone. It pairs up.' },
+    { id: 'n2',  kind: 'molecule', name: 'Nitrogen gas', symbol: 'N₂',  vector: { n: 2 }, color: '#818cf8', emoji: '🪁', tier: 1, flavor: '78% of the air, politely inert.', hint: 'Nitrogen twins, bonded for life.' },
+    { id: 'cl2', kind: 'molecule', name: 'Chlorine gas', symbol: 'Cl₂', vector: { cl: 2 }, color: '#a3e635', emoji: '☢️', tier: 1, flavor: 'Yellow-green, vicious, useful.', hint: 'Chlorine atoms pair up too. Unfortunately.' },
+
+    { id: 'water',     kind: 'everyday', name: 'Water', symbol: 'H₂O', vector: { h: 2, o: 1 }, color: '#60a5fa', emoji: '💧', tier: 2, flavor: 'The universal solvent; you are a bag of this.', hint: 'Two parts hydrogen, one part oxygen.' },
+    { id: 'h2o2',      kind: 'everyday', name: 'Hydrogen peroxide', symbol: 'H₂O₂', vector: { h: 2, o: 2 }, color: '#93c5fd', emoji: '🩹', tier: 2, flavor: 'Stings the scrape, bleaches the hair.', hint: 'Water that bites back.' },
+    { id: 'co2',       kind: 'everyday', name: 'Carbon dioxide', symbol: 'CO₂', vector: { c: 1, o: 2 }, color: '#a8a29e', emoji: '🥤', tier: 2, flavor: 'Your breath, bottled.', hint: 'A carbon atom asks two oxygens for a ride. Also the fizz in everything.' },
+    { id: 'co',        kind: 'everyday', name: 'Carbon monoxide', symbol: 'CO', vector: { c: 1, o: 1 }, color: '#78716c', emoji: '🛑', tier: 2, flavor: 'Silent, invisible, unforgiving.', hint: 'CO₂’s two-timing cousin with one oxygen short.' },
+    { id: 'salt',      kind: 'everyday', name: 'Table salt', symbol: 'NaCl', vector: { na: 1, cl: 1 }, color: '#fde68a', emoji: '🧂', tier: 2, flavor: 'Makes food edible. That is its whole job.', hint: 'Two elements walk into a kitchen.' },
+    { id: 'isopropanol', kind: 'everyday', name: 'Rubbing alcohol', symbol: 'C₃H₈O', vector: { c: 3, h: 8, o: 1 }, color: '#fda4af', emoji: '🧼', tier: 2, flavor: 'Disinfects, cools, evaporates fast.', hint: 'Acetone drinks hydrogen and sobers up.' },
+    { id: 'acetone',   kind: 'everyday', name: 'Acetone', symbol: 'C₃H₆O', vector: { c: 3, h: 6, o: 1 }, color: '#e879f9', emoji: '💅', tier: 2, flavor: 'That nail-polish-remover smell.', hint: 'Propane meets oxygen and sheds water.' },
+    { id: 'sugar',     kind: 'everyday', name: 'Sugar (glucose)', symbol: 'C₆H₁₂O₆', baseNote: 'base unit CH₂O, ×6', vector: { c: 1, h: 2, o: 1 }, full: { c: 6, h: 12, o: 6 }, color: '#fbcfe8', emoji: '🍬', tier: 2, flavor: 'A plant’s savings account.', hint: 'Air and water, held together by a leaf. Patience and sunlight optional.' },
+    { id: 'ethanol',   kind: 'everyday', name: 'Ethanol', symbol: 'C₂H₆O', vector: { c: 2, h: 6, o: 1 }, color: '#f0abfc', emoji: '🍷', tier: 2, flavor: 'Wine’s whole personality.', hint: 'Let sugar sit alone and nature does the rest.' },
+    { id: 'vinegar',   kind: 'everyday', name: 'Vinegar (acetic acid)', symbol: 'C₂H₄O₂', vector: { c: 2, h: 4, o: 2 }, color: '#fcd34d', emoji: '🥒', tier: 2, flavor: 'Wine that stayed out too long in the air.', hint: 'Ethanol exposed to oxygen turns sharp. Ask any cook.' },
+    { id: 'methane',   kind: 'everyday', name: 'Methane', symbol: 'CH₄', vector: { c: 1, h: 4 }, color: '#5eead4', emoji: '🔥', tier: 2, flavor: 'Your stove’s favorite molecule.', hint: 'One carbon’s quest for four hydrogens.' },
+    { id: 'propane',   kind: 'everyday', name: 'Propane', symbol: 'C₃H₈', vector: { c: 3, h: 8 }, color: '#fb923c', emoji: '🍖', tier: 2, flavor: 'The barbecue’s jet fuel.', hint: 'A longer chain: three carbons, eight hydrogens.' },
+    { id: 'ammonia',   kind: 'everyday', name: 'Ammonia', symbol: 'NH₃', vector: { n: 1, h: 3 }, color: '#bef264', emoji: '🧽', tier: 2, flavor: 'Window cleaner, fertilizer, poor choices.', hint: 'Nitrogen courts three hydrogens.' },
+    { id: 'urea',      kind: 'everyday', name: 'Urea', symbol: 'CO(NH₂)₂', vector: { c: 1, n: 2, o: 1, h: 4 }, color: '#86efac', emoji: '🌾', tier: 2, flavor: 'Fertilizer. Also other things, biologically speaking.', hint: 'Two ammonias and a carbon dioxide become tomorrow’s crops.' },
+    { id: 'sodawater', kind: 'everyday', name: 'Soda water (carbonic acid)', symbol: 'H₂CO₃', vector: { h: 2, c: 1, o: 3 }, color: '#7dd3fc', emoji: '🫧', tier: 2, flavor: 'The fizz itself, bottled by nobody.', hint: 'Water and carbon dioxide reach an uncomfortable truce.' },
+    { id: 'nh4hco3',   kind: 'everyday', name: 'Ammonium bicarbonate (hartshorn)', symbol: 'NH₄HCO₃', vector: { n: 1, h: 5, c: 1, o: 3 }, color: '#d9f99d', emoji: '👃', tier: 2, flavor: 'Grandma’s leavener; a.k.a. smelling salts.', hint: 'Ammonia and soda water make a very weird salt.' },
+    { id: 'nh4cl',     kind: 'everyday', name: 'Sal ammoniac', symbol: 'NH₄Cl', vector: { n: 1, h: 4, cl: 1 }, color: '#a7f3d0', emoji: '⚗️', tier: 2, flavor: 'Medieval flux for smelting copper.', hint: 'The price you pay when the Solvay process gives something up.' },
+    { id: 'cacl2',     kind: 'everyday', name: 'Calcium chloride', symbol: 'CaCl₂', vector: { ca: 1, cl: 2 }, color: '#fde68a', emoji: '🧊', tier: 2, flavor: 'Road salt and self-melting ice packs.', hint: 'Sal ammoniac and slaked lime trade souvenirs.' },
+    { id: 'bakingsoda', kind: 'everyday', name: 'Baking soda', symbol: 'NaHCO₃', vector: { na: 1, h: 1, c: 1, o: 3 }, color: '#fef08a', emoji: '🧁', tier: 2, flavor: 'Volcanoes and rising cakes.', hint: 'Ammonia salt meets table salt. The Solvay process’s true love.' },
+    { id: 'sodaash',   kind: 'everyday', name: 'Soda ash (washing soda)', symbol: 'Na₂CO₃', vector: { na: 2, c: 1, o: 3 }, color: '#e7e5e4', emoji: '🧺', tier: 2, flavor: 'Laundry’s hardcore elder statesman.', hint: 'Two caustic sodas meet one carbon dioxide.' },
+    { id: 'naoh',      kind: 'everyday', name: 'Caustic soda', symbol: 'NaOH', vector: { na: 1, o: 1, h: 1 }, color: '#fecaca', emoji: '🕳️', tier: 2, flavor: 'Drain-cleaner bravery. Respect it.', hint: 'Shock salt brine with current and it splits three ways.' },
+    { id: 'bleach',    kind: 'everyday', name: 'Bleach (sodium hypochlorite)', symbol: 'NaOCl', vector: { na: 1, cl: 1, o: 1 }, color: '#f5f5f4', emoji: '👕', tier: 2, flavor: 'Laundry’s great white hope.', hint: 'Caustic soda meets chlorine. NEVER mix with vinegar.' },
+    { id: 'cao',       kind: 'everyday', name: 'Quicklime', symbol: 'CaO', vector: { ca: 1, o: 1 }, color: '#fed7aa', emoji: '🔥', tier: 2, flavor: 'Burns ferociously, slakes like wrath.', hint: 'Calcium demands oxygen directly.' },
+    { id: 'caoh2',     kind: 'everyday', name: 'Slaked lime', symbol: 'Ca(OH)₂', vector: { ca: 1, o: 2, h: 2 }, color: '#fff7ed', emoji: '🖌️', tier: 2, flavor: 'Whitewash, plaster, aquarium pH.', hint: 'Quicklime and water make a violent, useful paste.' },
+    { id: 'limestone', kind: 'everyday', name: 'Limestone / chalk', symbol: 'CaCO₃', vector: { ca: 1, c: 1, o: 3 }, color: '#e7e5e4', emoji: '🪨', tier: 2, flavor: 'Seashells, cliffs, the White Cliffs.', hint: 'Bubble carbon dioxide through limewater and watch it cloud.' },
+    { id: 'rust',      kind: 'everyday', name: 'Rust', symbol: 'Fe₂O₃', vector: { fe: 2, o: 3 }, color: '#c2410c', emoji: '🧲', tier: 2, flavor: 'Metal’s slow surrender.', hint: 'Iron meets oxygen and gives up. It was inevitable.' },
+    { id: 'sand',      kind: 'everyday', name: 'Sand (silica)', symbol: 'SiO₂', vector: { si: 1, o: 2 }, color: '#fde68a', emoji: '🏖️', tier: 2, flavor: 'Every beach, ground into architecture.', hint: 'Silicon asks oxygen politely.' },
+    { id: 'glass',     kind: 'everyday', name: 'Glass (sodium silicate)', symbol: 'Na₂SiO₃', vector: { na: 2, si: 1, o: 3 }, color: '#bfdbfe', emoji: '🪟', tier: 2, flavor: 'Windows, bottles, phone screens.', hint: 'Sand falls for caustic soda.' },
+    { id: 'cement',    kind: 'everyday', name: 'Cement (calcium silicate)', symbol: 'CaSiO₃', vector: { ca: 1, si: 1, o: 3 }, color: '#d6d3d1', emoji: '🏢', tier: 2, flavor: 'The stuff cities stand on.', hint: 'Quicklime plus sand hardens into forever.' },
+    { id: 'hotice',    kind: 'everyday', name: 'Hot ice (sodium acetate)', symbol: 'CH₃COONa', vector: { na: 1, c: 2, h: 3, o: 2 }, color: '#bae6fd', emoji: '🧊', tier: 2, flavor: 'Liquid in the bottle, crystal on your palm.', hint: 'The volcano press yields a crystal that freezes when you touch it.' },
+    { id: 'diamond',   kind: 'special', name: 'Diamond', symbol: 'C', vector: { c: 4 }, color: '#e0f2fe', emoji: '💎', tier: 3, flavor: 'Carbon with delusions of grandeur.', hint: 'Carbon four times over. No pressure needed. Game logic.' }
+  ];
+
+  /* Specials — the ONLY expressly non-tiling rules in the game.
+   * Photosynthesis: six CO₂ + six H₂O in one press = one glucose + 6 O₂.
+   * (The lightest mass action a Crucible cannot hand-wave, so we hand-wave it anyway.) */
+  var SPECIALS = [
+    {
+      id: 'photosynthesis',
+      name: 'Photosynthesis',
+      apply: function (picks, working) {
+        var co2q = 0, waterq = 0;
+        picks.forEach(function (p) {
+          if (p.id === 'co2') co2q += p.qty;
+          if (p.id === 'water') waterq += p.qty;
+        });
+        var groups = Math.min(Math.floor(co2q / 6), Math.floor(waterq / 6));
+        if (groups < 1) return null;
+        var remaining = {};
+        for (var k in working) remaining[k] = working[k];
+        remaining.c = (remaining.c || 0) - 6 * groups;
+        remaining.h = (remaining.h || 0) - 12 * groups;
+        remaining.o = (remaining.o || 0) - 6 * groups;
+        var tiles = [];
+        for (var i = 0; i < groups; i++) tiles.push('sugar');
+        return { tiles: tiles, remaining: remaining };
+      }
+    },
+    {
+      /* Fermentation: sugar alone in the Crucible = ethanol + CO₂.
+       * (Biochemistry does the heavy lifting; the Crucible claims the credit.) */
+      id: 'fermentation',
+      name: 'Fermentation',
+      apply: function (picks, working, inv, inputIds) {
+        if (!picks.length || picks.length !== 1) return null;
+        var p = picks[0];
+        if (p.id !== 'sugar' || inputIds.indexOf('sugar') === -1) return null;
+        // picks may carry [{id,qty}] twice on same id — never happens via our UI, but be safe
+        var qty = 0;
+        picks.forEach(function (x) {
+          if (x.id === 'sugar') qty += x.qty;
+        });
+        if (qty < 1) return null;
+        var remaining = {};
+        for (var k in working) remaining[k] = working[k];
+        remaining.c = (remaining.c || 0) - 6 * qty;
+        remaining.h = (remaining.h || 0) - 12 * qty;
+        remaining.o = (remaining.o || 0) - 6 * qty;
+        var tiles = [];
+        for (var i = 0; i < qty; i++) { tiles.push('ethanol', 'ethanol', 'co2', 'co2'); }
+        return { tiles: tiles, remaining: remaining };
+      }
+    }
+  ];
+
+  var BADGES = [
+    { id: 'kitchen',       name: 'Kitchen Chemist', emoji: '🍳', desc: 'Discover sugar, ethanol, vinegar and baking soda', test: { all: ['sugar', 'ethanol', 'vinegar', 'bakingsoda'] } },
+    { id: 'janitor',       name: 'Janitor',         emoji: '🧹', desc: 'Discover baking soda, soda ash and bleach',       test: { all: ['bakingsoda', 'sodaash', 'bleach'] } },
+    { id: 'alchemist',     name: 'Classical Alchemist', emoji: '⚗️', desc: 'Discover diamond, glass and rust',             test: { all: ['diamond', 'glass', 'rust'] } },
+    { id: 'deity',         name: 'Deity',           emoji: '☀️', desc: 'Photosynthesize sugar (6× CO₂ + 6× H₂O in one press)', test: { all: ['sugar'] } },
+    { id: 'dontmix',       name: 'DO NOT MIX',      emoji: '☠️', desc: 'Discover bleach and vinegar. Chemistry teachers weep.', test: { all: ['bleach', 'vinegar'] } },
+    { id: 'barelybalanced', name: 'Barely Balanced', emoji: '⚖️', desc: 'Three or more discoveries from one press',        test: { pressDistinct: 3 } },
+    { id: 'speedrunner',   name: 'Speedrunner',     emoji: '⚡', desc: 'Complete the collection without a single Oracle hint', test: { allNoHints: true } }
+  ];
+
+  return { STARTERS: STARTERS, ENTRIES: ENTRIES, BADGES: BADGES, SPECIALS: SPECIALS };
+});
+
+</script>
+<script>
+/* Elementary, Dear Doodle — engine.
+ * Inventory = atom multiset. A press picks up to two card types with
+ * quantities 1..9, sums their vectors, then tiles the remainder with
+ * lexicon entries (any integer multiple of a minimal vector matches).
+ * Pure functions, UMD-wrapped so the reachability validator can require() it.
+ *
+ * Partial matches are legal: leftover atoms vent as junk. There is no
+ * requirement to fully consume the inventory — that keeps presses forgiving. */
+(function (root, factory) {
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = factory();
+  } else {
+    root.AlchemyEngine = factory();
+  }
+})(typeof self !== 'undefined' ? self : this, function () {
+  var KEYS = ['h', 'c', 'n', 'o', 'na', 'cl', 'ca', 'fe', 'si'];
+
+  function emptyInv() {
+    var v = {}; KEYS.forEach(function (k) { v[k] = 0; }); return v;
+  }
+  function addInto(inv, vec, qty) {
+    for (var k in vec) inv[k] = (inv[k] || 0) + vec[k] * (qty || 1);
+    return inv;
+  }
+  function cloneVec(v) { var o = {}; for (var k in v) o[k] = v[k]; return o; }
+  function isZero(v) { for (var k in v) if (v[k] !== 0) return false; return true; }
+  function fits(entryVec, inv) {
+    for (var k in entryVec) if ((inv[k] || 0) < entryVec[k]) return false;
+    return true;
+  }
+  function subtract(inv, entryVec) {
+    var o = cloneVec(inv);
+    for (var k in entryVec) o[k] -= entryVec[k];
+    return o;
+  }
+  function invKey(v) {
+    var parts = [];
+    KEYS.forEach(function (k) { if (v[k]) parts.push(k + ':' + v[k]); });
+    return parts.length ? parts.join(',') : '0';
+  }
+  function atomCount(v) { var s = 0; for (var k in v) s += v[k]; return s; }
+
+  var MAX_PARTIALS = 48;   // partial solutions kept per state — caps blowup
+  var MAX_DEPTH = 24;
+
+  var KIND_WEIGHT = { molecule: 2, everyday: 3, special: 3, starter: 0 };
+
+  function scoreSolution(tiles, byId, inputSet) {
+    var distinct = {}, total = tiles.length, atoms = 0, weight = 0, novel = false, inputTiles = 0;
+    tiles.forEach(function (id) {
+      if (inputSet.indexOf(id) === -1) novel = true;
+      else inputTiles++;
+    });
+    tiles.forEach(function (id) {
+      distinct[id] = 1;
+      var e = byId[id];
+      if (e) {
+        for (var k in e.vector) atoms += e.vector[k];
+        weight += KIND_WEIGHT[e.kind] || 0;
+        if (inputSet.indexOf(id) !== -1) weight -= 1000; // re-tiling the input back into itself is never the answer
+      }
+    });
+    return { atoms: atoms, weight: weight, distinct: Object.keys(distinct).length, total: total, novel: novel, inputTiles: inputTiles };
+  }
+  /* Scoring context — set per resolve() call (single-threaded, fine). */
+  var scoreCtx = { byId: {}, input: [] };
+
+  /* atoms consumed desc -> solution containing a NON-input tile desc
+   * -> FEWER tiles asc (compounds over confetti)
+   * -> weight desc -> distinct breadth desc */
+  function betterThan(a, b) {
+    var sa = scoreSolution(a, scoreCtx.byId, scoreCtx.input), sb = scoreSolution(b, scoreCtx.byId, scoreCtx.input);
+    if (sa.atoms !== sb.atoms) return sa.atoms - sb.atoms;
+    if (sa.novel !== sb.novel) return (sa.novel ? 1 : 0) - (sb.novel ? 1 : 0);
+    if (sa.inputTiles !== sb.inputTiles) return sb.inputTiles - sa.inputTiles;
+    if (sa.total !== sb.total) return sb.total - sa.total;
+    if (sa.weight !== sb.weight) return sa.weight - sb.weight;
+    return sa.distinct - sb.distinct;
+  }
+  /* Keep only the best partial solutions — atoms & weight are monotone
+   * nondecreasing, so pruning by them never hides a better final tiling. */
+  function keepBest(sols) {
+    if (sols.length <= MAX_PARTIALS) return sols;
+    sols.sort(betterThan);
+    return sols.slice(sols.length - MAX_PARTIALS);
+  }
+
+  function makeResolver(lexEntries, specials) {
+    specials = specials || [];
+    var MEMO_MAX = 20000;
+    var pool = lexEntries.slice();
+    var byId = {};
+    pool.forEach(function (e) { byId[e.id] = e; });
+    var memo = {};
+    var memoSize = 0;
+
+    function search(inv, depth) {
+    var key = invKey(inv);
+    if (depth >= MAX_DEPTH) return [[]];
+    if (memo[key]) return memo[key];
+    if (memoSize > MEMO_MAX) { memo = {}; memoSize = 0; }
+    memoSize++;
+
+    var sols = [[]]; // the "stop here" (vent) option
+    for (var i = 0; i < pool.length; i++) {
+      var e = pool[i];
+      if (!fits(e.vector, inv)) continue;
+      var sub = search(subtract(inv, e.vector), depth + 1);
+      for (var j = 0; j < sub.length; j++) {
+        sols.push([e.id].concat(sub[j]));
+      }
+      sols = keepBest(sols);
+    }
+    memo[key] = sols;
+    return sols;
+  }
+
+  function resetMemo() { /* memo is shared across resolves — states are global */ }
+
+    /* Resolve a press. inv: atom multiset. opts.inputIds: ids placed in the slots,
+     * used to penalize tiling an input back into itself. opts.picks: [{id, qty}],
+     * lets specials match on the raw pick combination (e.g. photosynthesis). */
+    function resolve(inv, opts) {
+      opts = opts || {};
+      var inputIds = opts.inputIds || [];
+      scoreCtx.byId = byId;
+      scoreCtx.input = inputIds;
+
+      // Specials run first and may consume part of the inventory.
+      var specialTiles = [];
+      var working = cloneVec(inv);
+      for (var s = 0; s < specials.length; s++) {
+        var res = specials[s].apply ? specials[s].apply(opts.picks || [], working, inv, inputIds) : null;
+        if (res && res.tiles && res.tiles.length) {
+          specialTiles = specialTiles.concat(res.tiles);
+          working = res.remaining;
+        }
+      }
+      var sols = search(working, 0);
+      if (!sols.length) sols = [[]];
+      if (specialTiles.length) {
+        sols = sols.map(function (sol) { return specialTiles.concat(sol); });
+      }
+      // consume the most atoms, win ties by weight/tiles/breadth
+      var best = sols[0];
+      for (var i = 1; i < sols.length; i++) {
+        if (betterThan(sols[i], best) > 0) best = sols[i];
+      }
+      // leftover after the best tiling
+      var remaining = cloneVec(inv);
+      best.forEach(function (id) { remaining = subtract(remaining, byId[id].vector); });
+
+      var counts = {};
+      best.forEach(function (id) { counts[id] = (counts[id] || 0) + 1; });
+
+      return {
+        tiles: best.slice(),          // entry ids with repetitions
+        counts: counts,               // { entryId: nTiles }
+        distinct: Object.keys(counts),
+        vented: remaining,            // atoms vented as junk
+        vendAtoms: atomCount(remaining),
+        allSolutions: sols            // capped — validator unions over these
+      };
+    }
+
+    return { resolve: resolve };
+  }
+
+  function sumPicks(picks) {
+    var inv = emptyInv();
+    picks.forEach(function (p) { if (p && p.card) addInto(inv, p.card.full || p.card.vector, p.qty || 1); });
+    return inv;
+  }
+
+  return {
+    KEYS: KEYS,
+    emptyInv: emptyInv,
+    sumPicks: sumPicks,
+    atomCount: atomCount,
+    invKey: invKey,
+    fits: fits,
+    makeResolver: makeResolver
+  };
+});
+
+</script>
+<script>
+/* Elementary, Dear Doodle — UI & game state. */
+'use strict';
+
+var STARTERS = LEXICON.STARTERS, ENTRIES = LEXICON.ENTRIES, BADGES = LEXICON.BADGES, SPECIALS = LEXICON.SPECIALS;
+var resolver = AlchemyEngine.makeResolver(ENTRIES, SPECIALS);
+var byId = {};
+STARTERS.concat(ENTRIES).forEach(function (c) { byId[c.id] = c; });
+
+var SAVE_KEY = 'everyday-alchemy-save-v1';
+var starterIds = STARTERS.map(function (c) { return c.id; });
+
+/* ── State ─────────────────────────────────────────────── */
+var defaultState = function () {
+  return {
+    discovered: starterIds.slice(),
+    badges: [],
+    energy: 100,
+    hints: 0,
+    presses: 0,
+    fizzles: 0,
+    journal: [],
+    startTs: Date.now(),
+    winSeen: false,
+    slots: [null, null],
+    slotQty: [1, 1],
+    activeSlot: 0
+  };
+};
+var state = load() || defaultState();
+var discovered = new Set(state.discovered);
+
+function load() {
+  try {
+    var raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return null;
+    var s = JSON.parse(raw);
+    if (!Array.isArray(s.discovered)) return null;
+    var merged = defaultState();
+    Object.keys(merged).forEach(function (k) { if (s[k] !== undefined) merged[k] = s[k]; });
+    return merged;
+  } catch (e) { return null; }
+}
+function save() {
+  state.discovered = Array.from(discovered);
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) { /* quota? whatever */ }
+}
+function $(sel) { return document.querySelector(sel); }
+function $$(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
+function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]; }); }
+function entryById(id) { return byId[id] || null; }
+
+/* ── Audio (tiny WebAudio blips, no assets) ────────────── */
+var audioCtx = null;
+function tone(freq, dur, type, gain, delay) {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = type || 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, audioCtx.currentTime + (delay || 0));
+    g.gain.exponentialRampToValueAtTime(gain || 0.08, audioCtx.currentTime + (delay || 0) + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (delay || 0) + (dur || 0.3));
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(audioCtx.currentTime + (delay || 0)); o.stop(audioCtx.currentTime + (delay || 0) + (dur || 0.3) + 0.05);
+  } catch (e) { /* audio unavailable — fine */ }
+}
+function sfxDiscovery() { [523, 659, 784, 1047].forEach(function (f, i) { tone(f, 0.22, 'triangle', 0.09, i * 0.09); }); }
+function sfxBadge() { [880, 1175, 1568].forEach(function (f, i) { tone(f, 0.25, 'square', 0.06, i * 0.1); }); }
+function sfxFizzle() { tone(110, 0.35, 'sawtooth', 0.07, 0); }
+function sfxClick() { tone(660, 0.05, 'square', 0.03, 0); }
+
+/* ── HUD & render ──────────────────────────────────────── */
+function renderHUD() {
+  $('#energyFill').style.width = clamp(state.energy, 0, 100) + '%';
+  $('#energyText').textContent = Math.floor(state.energy);
+  $('#benchCount').textContent = discovered.size;
+  $('#collectionProgress').textContent = ENTRIES.filter(function (e) { return discovered.has(e.id); }).length + '/' + ENTRIES.length;
+}
+
+function gradientFor(card) {
+  return '--card-c1:' + card.color + ';--card-c2:' + shade(card.color, -0.45) + ';';
+}
+function shade(hex, amt) {
+  var m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!m) return hex;
+  var f = function (n) { n = parseInt(n, 16) + Math.round(255 * amt); return clamp(n, 0, 255).toString(16).padStart(2, '0'); };
+  return '#' + f(m[1]) + f(m[2]) + f(m[3]);
+}
+
+function renderBench() {
+  var grid = $('#benchGrid'); grid.innerHTML = '';
+  var known = STARTERS.concat(ENTRIES.filter(function (e) { return discovered.has(e.id); }));
+  known.forEach(function (card) {
+    var btn = document.createElement('button');
+    btn.className = 'card' + (card.kind === 'starter' ? ' starter-card' : '');
+    btn.style.cssText = gradientFor(card);
+    btn.setAttribute('data-id', card.id);
+    btn.innerHTML = '<span class="card-symbol">' + escapeHtml(card.symbol) + '</span>' +
+      '<span class="card-name">' + escapeHtml(card.name) + '</span>' +
+      (card.kind === 'starter' ? '<span class="card-infinity">∞</span>' : '');
+    btn.addEventListener('click', function () { sfxClick(); placeInActiveSlot(card.id); });
+    grid.appendChild(btn);
+  });
+}
+
+function renderSlots() {
+  [0, 1].forEach(function (i) {
+    var slot = i === 0 ? $('#slotA') : $('#slotB');
+    var qtyEl = i === 0 ? $('#qtyA') : $('#qtyB');
+    var id = state.slots[i];
+    qtyEl.textContent = state.slotQty[i];
+    if (id) {
+      var card = entryById(id);
+      slot.classList.add('filled');
+      slot.style.cssText = gradientFor(card);
+      slot.innerHTML = '<span class="slot-card"><span class="card-emoji">' + escapeHtml(card.emoji) + '</span>' +
+        '<span class="card-symbol">' + escapeHtml(card.symbol) + '</span>' +
+        '<span class="card-name">' + escapeHtml(card.name) + '</span></span>';
+    } else {
+      slot.classList.remove('filled'); slot.style.cssText = '';
+      slot.innerHTML = '<span class="slot-placeholder">Slot ' + (i + 1) + '<br><small>' + (i === 0 ? 'click a bench card' : 'optional') + '</small></span>';
+    }
+  });
+}
+
+function renderCollection() {
+  var grid = $('#collectionGrid'); grid.innerHTML = '';
+  ENTRIES.forEach(function (card) {
+    var isOpen = discovered.has(card.id);
+    var div = document.createElement('div');
+    if (isOpen) {
+      div.className = 'collect-card unlocked';
+      div.style.cssText = gradientFor(card);
+      div.innerHTML = '<span class="card-symbol">' + escapeHtml(card.symbol) + '</span><span class="card-name">' + escapeHtml(card.name) + '</span>';
+      div.addEventListener('click', function () { openCardModal(card); });
+    } else {
+      div.className = 'collect-card locked';
+      div.innerHTML = '<span class="card-symbol">?</span><span class="card-name">undiscovered</span>';
+    }
+    grid.appendChild(div);
+  });
+}
+
+function renderJournal() {
+  var list = $('#journalList'); list.innerHTML = '';
+  if (!state.journal.length) {
+    list.innerHTML = '<p class="vent-idle">Nothing yet. The Crucible awaits its first miracle.</p>';
+    return;
+  }
+  state.journal.slice().reverse().forEach(function (entry) {
+    var btn = document.createElement('button');
+    btn.className = 'journal-entry';
+    btn.innerHTML = '<b>' + escapeHtml(entry.title) + '</b><small>' + escapeHtml(entry.when) + '</small>';
+    btn.addEventListener('click', function () { openJournalModal(entry); });
+    list.appendChild(btn);
+  });
+}
+
+function renderBadges() {
+  var list = $('#badgeList'); list.innerHTML = '';
+  BADGES.forEach(function (badge) {
+    var earned = state.badges.indexOf(badge.id) !== -1;
+    var div = document.createElement('div');
+    div.className = 'badge' + (earned ? ' earned' : '');
+    div.innerHTML = '<span class="badge-emoji">' + badge.emoji + '</span>' +
+      '<span><span class="badge-name">' + escapeHtml(badge.name) + '</span><br>' +
+      '<span class="badge-desc">' + escapeHtml(badge.desc) + '</span></span>';
+    list.appendChild(div);
+  });
+}
+
+function renderAll() { renderHUD(); renderBench(); renderSlots(); renderCollection(); renderJournal(); renderBadges(); }
+
+/* ── Slots & reacting ──────────────────────────────────── */
+function placeInActiveSlot(id) {
+  var i = state.activeSlot;
+  state.slots[i] = id;
+  state.activeSlot = (i === 0 && !state.slots[1]) ? 1 : (i === 1 && !state.slots[0]) ? 0 : i;
+  save(); renderSlots();
+}
+function clearSlot(i) { state.slots[i] = null; sfxClick(); save(); renderSlots(); }
+
+$('#slotA').addEventListener('click', function () { clearSlot(0); });
+$('#slotB').addEventListener('click', function () { clearSlot(1); });
+$('#swapBtn').addEventListener('click', function () {
+  sfxClick();
+  var s = state.slots, q = state.slotQty;
+  state.slots = [s[1], s[0]]; state.slotQty = [q[1], q[0]];
+  save(); renderSlots();
+});
+$$('.qty-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var wrap = btn.closest('.qty-ctrl');
+    var i = Number(wrap.getAttribute('data-slot'));
+    var delta = Number(btn.getAttribute('data-delta'));
+    state.slotQty[i] = clamp(state.slotQty[i] + delta, 1, 9);
+    sfxClick(); save(); renderSlots();
+  });
+});
+
+function formatVecSymbol(vec) {
+  var parts = [];
+  Object.keys(vec).forEach(function (k) {
+    if (vec[k] > 0) parts.push(vec[k] + capEl(k));
+  });
+  return parts.join(' ');
+}
+function capEl(k) {
+  var map = { h: 'H', c: 'C', n: 'N', o: 'O', na: 'Na', cl: 'Cl', ca: 'Ca', fe: 'Fe', si: 'Si' };
+  return map[k] || k.toUpperCase();
+}
+
+function toast(text, kind) {
+  var el = document.createElement('div');
+  el.className = 'toast' + (kind ? ' ' + kind + '-toast' : '');
+  el.textContent = text;
+  $('#toasts').appendChild(el);
+  setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 3000);
+}
+
+function isSpecialPress(picks, tiles) {
+  var ids = picks.map(function (p) { return p.id; });
+  if (ids.length === 1 && ids[0] === 'sugar' && tiles.indexOf('ethanol') !== -1) return 'fermentation';
+  var co2 = 0, water = 0;
+  picks.forEach(function (p) { if (p.id === 'co2') co2 += p.qty; if (p.id === 'water') water += p.qty; });
+  if (co2 >= 6 && water >= 6 && tiles.indexOf('sugar') !== -1) return 'photosynthesis';
+  return null;
+}
+
+function react() {
+  var picks = [];
+  for (var i = 0; i < 2; i++) {
+    var id = state.slots[i];
+    if (!id) continue;
+    picks.push({ id: id, qty: state.slotQty[i], card: entryById(id) });
+  }
+  if (!picks.length) { toast('The Crucible glares at the empty slots.', 'fizzle'); return; }
+  state.presses++;
+  var inv = AlchemyEngine.sumPicks(picks);
+  var inputIds = picks.map(function (p) { return p.id; });
+  var rawPicks = picks.map(function (p) { return { id: p.id, qty: p.qty }; });
+  var res = resolver.resolve(inv, { inputIds: inputIds, picks: rawPicks });
+
+  var vent = $('#ventArea'); vent.innerHTML = '';
+
+  if (!res.tiles.length) {
+    state.energy = clamp(state.energy - 5, 0, 100);
+    state.fizzles++;
+    sfxFizzle();
+    vent.innerHTML = '<div class="vent-line">💨 <span>The Crucible *fzzzt* — nothing takes.</span></div>' +
+      '<div class="vent-junk">A sad little puff of junk. (−5⚡)</div>';
+    toast('It fizzles…', 'fizzle');
+    save(); renderHUD(); return;
+  }
+
+  var newIds = res.tiles.filter(function (id) { return !discovered.has(id); });
+  var uniqueNew = Array.from(new Set(newIds));
+  var special = isSpecialPress(rawPicks, res.tiles);
+
+  uniqueNew.forEach(function (id) { discovered.add(id); state.discovered = Array.from(discovered); });
+  state.energy = clamp(state.energy + (uniqueNew.length ? 10 : 2), 0, 100);
+
+  // result line
+  var tileCounts = {};
+  res.tiles.forEach(function (id) { tileCounts[id] = (tileCounts[id] || 0) + 1; });
+  var line = document.createElement('div');
+  line.className = 'vent-line';
+  line.innerHTML = '<span>⚗️</span> <span class="vent-arrow">→</span> ';
+  Object.keys(tileCounts).forEach(function (id) {
+    var card = entryById(id);
+    var chip = document.createElement('span');
+    chip.className = 'vent-chip' + (uniqueNew.indexOf(id) !== -1 ? ' new' : '') + (special ? ' special' : '');
+    chip.textContent = (tileCounts[id] > 1 ? tileCounts[id] + '× ' : '') + card.name;
+    line.appendChild(chip);
+  });
+  vent.appendChild(line);
+
+  var ventedAtoms = AlchemyEngine.atomCount(res.vented);
+  var ventNote = document.createElement('div');
+  if (ventedAtoms > 0) {
+    ventNote.className = 'vent-junk';
+    ventNote.textContent = 'Vented: ' + formatVecSymbol(res.vented) + ' (atoms shrugged off)';
+  } else {
+    ventNote.className = 'vent-complete';
+    ventNote.textContent = 'Complete reaction. The Crucible purrs like a cat.';
+  }
+  vent.appendChild(ventNote);
+
+  if (special) {
+    var spNote = document.createElement('div');
+    spNote.className = 'vent-complete';
+    spNote.textContent = special === 'photosynthesis' ? '✨ Photosynthesis!! Somewhere, a leaf applauds.' : '✨ Fermentation!! Yeast does the heavy lifting.';
+    vent.appendChild(spNote);
+  }
+
+  if (uniqueNew.length) {
+    sfxDiscovery();
+    uniqueNew.forEach(function (id) { toast('New discovery: ' + entryById(id).name + '!', 'badge'); });
+    state.journal.push({
+      ts: Date.now(),
+      title: uniqueNew.map(function (id) { return entryById(id).name; }).join(' + '),
+      when: new Date().toLocaleString(),
+      picks: rawPicks,
+      tiles: res.tiles.slice(),
+      special: special
+    });
+    if (state.journal.length > 300) state.journal = state.journal.slice(-300);
+  } else {
+    toast('…everything you made, you already knew.');
+  }
+
+  checkBadges(uniqueNew.length);
+  save();
+  renderAll();
+  checkWin();
+}
+$('#reactBtn').addEventListener('click', react);
+
+/* ── Badges & win ──────────────────────────────────────── */
+function badgeTest(badge) {
+  var t = badge.test || {};
+  if (t.all) return t.all.every(function (id) { return discovered.has(id); });
+  if (t.allNoHints) return state.hints === 0 && ENTRIES.every(function (e) { return discovered.has(e.id); });
+  return false;
+}
+function checkBadges(newDiscoveriesThisPress) {
+  var newlyEarned = [];
+  BADGES.forEach(function (badge) {
+    if (state.badges.indexOf(badge.id) !== -1) return;
+    var earned = false;
+    if (badge.test && badge.test.pressDistinct) earned = newDiscoveriesThisPress >= badge.test.pressDistinct;
+    else earned = badgeTest(badge);
+    if (earned) { state.badges.push(badge.id); newlyEarned.push(badge); }
+  });
+  newlyEarned.forEach(function (badge, i) {
+    setTimeout(function () { toast('🏅 Badge earned: ' + badge.name, 'badge'); sfxBadge(); }, 400 + i * 350);
+  });
+}
+function checkWin() {
+  var remaining = ENTRIES.filter(function (e) { return !discovered.has(e.id); });
+  if (remaining.length === 0 && !state.winSeen) {
+    state.winSeen = true;
+    if (state.hints === 0 && state.badges.indexOf('speedrunner') === -1) state.badges.push('speedrunner');
+    save();
+    $('#winBanner').hidden = false;
+    renderBadges();
+  }
+}
+
+/* ── Oracle ─────────────────────────────────────────────── */
+$('#oracleBtn').addEventListener('click', function () {
+  var remaining = ENTRIES.filter(function (e) { return !discovered.has(e.id); });
+  if (!remaining.length) { toast('The Oracle knows everything you know. It is bored.'); return; }
+  if (state.energy < 10) { toast('Not enough energy for the Oracle (need 10⚡).', 'fizzle'); return; }
+  state.energy -= 10; state.hints++;
+  var pick = remaining[Math.floor(Math.random() * remaining.length)];
+  sfxClick();
+  openModal('<div class="modal-emoji">🔮</div><h3 id="modalTitle">The Oracle whispers…</h3>' +
+    '<p class="modal-flavor">“' + escapeHtml(pick.hint) + '”</p>' +
+    '<p class="modal-real">— something involving ' + escapeHtml(guessTheme(pick)) + ' stirs in the Crucible, undiscovered.</p>');
+  save(); renderHUD();
+});
+function guessTheme(card) {
+  if (card.tier === 1) return 'simple molecules';
+  if (card.tier === 3) return 'carbon and stubbornness';
+  return 'everyday chemistry';
+}
+
+/* ── Modals ─────────────────────────────────────────────── */
+function openModal(html) {
+  $('#modalBody').innerHTML = html;
+  $('#modal').hidden = false;
+}
+function closeModal() { $('#modal').hidden = true; }
+$('#modalClose').addEventListener('click', closeModal);
+$('#modal').addEventListener('click', function (e) { if (e.target === $('#modal')) closeModal(); });
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+function openCardModal(card) {
+  var atomLines = Object.keys(card.vector).map(function (k) {
+    return (card.vector[k] > 1 ? card.vector[k] + '× ' : '') + capEl(k);
+  }).join(' + ');
+  openModal('<div class="modal-emoji">' + escapeHtml(card.emoji) + '</div>' +
+    '<div class="modal-big-symbol">' + escapeHtml(card.symbol) + '</div>' +
+    '<h3 id="modalTitle">' + escapeHtml(card.name) + '</h3>' +
+    '<div class="modal-equation">' + escapeHtml(atomLines) + '</div>' +
+    '<p class="modal-flavor">' + escapeHtml(card.flavor) + '</p>' +
+    '<p class="modal-real">Kind: ' + escapeHtml(card.kind) + ' · Tier ' + card.tier + '</p>');
+}
+function openJournalModal(entry) {
+  var picksHtml = entry.picks.map(function (p) {
+    var card = entryById(p.id);
+    return (p.qty > 1 ? p.qty + '× ' : '') + '<b>' + escapeHtml(card.name) + '</b>';
+  }).join(' + ');
+  var tileCounts = {};
+  entry.tiles.forEach(function (id) { tileCounts[id] = (tileCounts[id] || 0) + 1; });
+  var out = Object.keys(tileCounts).map(function (id) {
+    return (tileCounts[id] > 1 ? tileCounts[id] + '× ' : '') + '<b>' + escapeHtml(entryById(id).name) + '</b>';
+  }).join(' + ');
+  openModal('<h3 id="modalTitle">📖 ' + escapeHtml(entry.title) + '</h3>' +
+    '<p class="modal-real">' + escapeHtml(entry.when) + '</p>' +
+    '<div class="modal-equation">' + picksHtml + ' &nbsp;→&nbsp; ' + out + '</div>' +
+    (entry.special ? '<p class="modal-flavor">✨ A special reaction: ' + escapeHtml(entry.special) + '</p>' : '') +
+    '<p class="modal-flavor">The Crucible remembers.</p>');
+}
+
+/* ── Stats ──────────────────────────────────────────────── */
+$('#statsBtn').addEventListener('click', function () {
+  var found = ENTRIES.filter(function (e) { return discovered.has(e.id); }).length;
+  var mins = Math.floor((Date.now() - state.startTs) / 60000);
+  openModal('<h3 id="modalTitle">📊 Your Alchemy, By the Numbers</h3>' +
+    '<div class="modal-equation">Discoveries: ' + found + '/' + ENTRIES.length + ' (' + Math.round(found / ENTRIES.length * 100) + '%)<br>' +
+    'Presses: ' + state.presses + ' · Fizzles: ' + state.fizzles + '<br>' +
+    'Oracle hints used: ' + state.hints + ' · Badges: ' + state.badges.length + '/' + BADGES.length + '<br>' +
+    'Time in the lab: ' + mins + ' min</div>' +
+    '<p class="modal-flavor">Scientists would call this “messing around with reagents”. You call it progress.</p>');
+});
+$('#winStatsBtn').addEventListener('click', function () { $('#winBanner').hidden = true; $('#statsBtn').click(); });
+$('#winCloseBtn').addEventListener('click', function () { $('#winBanner').hidden = true; });
+
+/* ── Export / Import / Reset ────────────────────────────── */
+$('#exportBtn').addEventListener('click', function () {
+  state.discovered = Array.from(discovered);
+  var blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'everyday-alchemy-save.json';
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+  toast('Save exported. Guard it with your life.');
+});
+$('#importFile').addEventListener('change', function (e) {
+  var file = e.target.files && e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function () {
+    try {
+      var s = JSON.parse(reader.result);
+      if (!Array.isArray(s.discovered)) throw new Error('not a save');
+      s.discovered = s.discovered.filter(function (id) { return entryById(id); });
+      localStorage.setItem(SAVE_KEY, JSON.stringify(s));
+      toast('Save loaded. The Crucible stirs…');
+      setTimeout(function () { location.reload(); }, 600);
+    } catch (err) {
+      toast('That file is not a save of this game.', 'fizzle');
+    }
+  };
+  reader.readAsText(file);
+});
+$('#resetBtn').addEventListener('click', function () {
+  if (confirm('Burn your save and start over? Your discoveries will be smelted into slag.')) {
+    localStorage.removeItem(SAVE_KEY);
+    location.reload();
+  }
+});
+
+/* ── Tabs ───────────────────────────────────────────────── */
+$$('.tab').forEach(function (tab) {
+  tab.addEventListener('click', function () {
+    $$('.tab').forEach(function (t) { t.classList.remove('active'); });
+    $$('.tab-pane').forEach(function (p) { p.classList.remove('active'); });
+    tab.classList.add('active');
+    $('#tab-' + tab.getAttribute('data-tab')).classList.add('active');
+  });
+});
+
+/* ── Energy regen ───────────────────────────────────────── */
+setInterval(function () {
+  if (state.energy < 100) { state.energy = clamp(state.energy + 1, 0, 100); save(); renderHUD(); }
+}, 1000);
+
+/* ── Boot ───────────────────────────────────────────────── */
+renderAll();
+$('#collectionProgress').textContent = ENTRIES.filter(function (e) { return discovered.has(e.id); }).length + '/' + ENTRIES.length;
+
+/* Debug handle for automated smoke tests (harmless in production). */
+window.AlchemyDebug = {
+  react: react,
+  state: function () { return { discovered: Array.from(discovered), energy: state.energy, presses: state.presses }; }
+};
+
+</script>
+</body>
+</html>

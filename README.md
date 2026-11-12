@@ -28,6 +28,7 @@ npx serve .
 | `js/app.js` | UI, state, localStorage save, badges, Oracle, toasts, WebAudio blips. |
 | `tools/validate.cjs` | Greedy reachability BFS: fails if any entry is unreachable from the starters. |
 | `tools/plays.cjs` | Exact verification of one winning press per entry via the real engine. |
+| `tools/build-single.cjs` | Inlines everything into `elementary-dear-doodle-single.html` — the whole game as one file. |
 
 ```bash
 node tools/validate.cjs   # reachability sweep (~2s)
